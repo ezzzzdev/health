@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Re:Spring 피트니스 출입 프로그램-Recognize</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/common.css">
+    <style>
+        #attendBox{
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #attendBox .attend_enterBtn, .attend_exitBtn, .back{
+            margin: 0 20px 0 20px;
+            padding: 10px 20px;
+            color : #03430c;
+            background-color : #ffffff;
+            border : solid 1px #03430c;
+            text-align: center;
+        }
+
+        #attendBox .attend_enterBtn:hover, .attend_exitBtn:hover, .back:hover{
+            text-shadow: 0 0 0 #ffffff;
+            background-color : #03430c;
+            color : #ffffff;
+        }
+
+        .commentText{
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="mainBox">
+        <a href="/" class="main_title">Re:Spring 피트니스 🌷</a>
+        <p class="sub_title">회원 센터 출입</p>
+    </div>
+    <div id="video_container">
+        <video id="webcam" autoplay muted="muted"></video><br>
+    </div>
+    <div id="attendBox">
+        <button class="attend_enterBtn" id="enterButton">센터 입실</button>
+        <button class="attend_exitBtn" id="exitButton">센터 퇴실</button>
+        <a class="back" href="/">돌아가기</a>
+    </div>
+    <p id="comment" class="commentText"></p>
+
+    <script>
+      const videoElement = document.getElementById("webcam");
+      const comment = document.getElementById("comment");
+      let isProcessingFrame = false;
+      const enterButton = document.getElementById("enterButton");
+      const exitButton = document.getElementById("exitButton");
+      // 전역 변수로 인터벌 ID 저장
+      let faceRecognitionIntervalId = null;
+
+      // 웹 카메라 스트리밍
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          videoElement.srcObject = stream;
+          videoElement.play();
+          // startFaceRecognition();
+        })
+        .catch((error) => {
+          console.error("Error accessing webcam:", error);
+          alert(
+            "웹캠에 접근할 수 없습니다. 웹캠 권한과 브라우저 호환성을 확인해주세요."
+          );
+        });
+
+      enterButton.addEventListener("click", () => {
+        startFaceRecognition("enter");
+      });
+      exitButton.addEventListener("click", () => {
+        startFaceRecognition("exit");
+      });
+
+      function clearFaceRecognitionInterval() {
+        if (faceRecognitionIntervalId !== null) {
+          clearInterval(faceRecognitionIntervalId);
+          faceRecognitionIntervalId = null;
+        }
+      }
+
+      function displayMessage(msg) {
+        const messageElement = document.getElementById("message");
+        if (!messageElement) {
+          const comment = document.getElementById("comment");
+          comment.id = "message";
+          comment.style.color = "green"; // 메시지 스타일링
+          comment.innerText = msg;
+          // document.body.insertBefore(comment, document.body.firstChild); // video 태그 바로 아래에 메시지를 표시
+        } else {
+          messageElement.innerText = msg; // 메시지 업데이트
+        }
+      }
+
+      function startFaceRecognition(action) {
+        clearFaceRecognitionInterval(); // 기존 인터벌 취소
+        faceRecognitionIntervalId = setInterval(async () => {
+          if (isProcessingFrame) return; // 이전 프레임 처리가 완료될 때까지 대기
+          isProcessingFrame = true;
+          const canvas = document.createElement("canvas");
+          canvas.width = videoElement.videoWidth;
+          canvas.height = videoElement.videoHeight;
+          const context = canvas.getContext("2d");
+          context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+          // 캔버스에서 이미지 데이터를 바이너리로 변환
+          canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append("image", blob, "image.jpg");
+            formData.append("action", action);
+
+            try {
+              const response = await fetch("/recognize_face", {
+                method: "POST",
+                body: formData,
+              });
+              const data = await response.json();
+              if (data) {
+                displayMessage(data.message); // 서버로부터 받은 응답을 사용자에게 alert로 표시
+              }
+            } catch (error) {
+              console.error("Error recognizing face:", error);
+            }
+            isProcessingFrame = false;
+          }, "image/jpeg");
+        }, 3000); // 4초 간격으로 얼굴 인식 요청
+      }
+    </script>
+  </body>
+</html>

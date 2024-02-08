@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Re:Spring 피트니스 출입 프로그램-Regist</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/common.css" />
+    <style>
+      #inputBox {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .inName {
+        border-radius: 5px;
+        border: solid 1px black;
+        padding: 7px 3px;
+      }
+
+      #registerBox {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      #registerBox .regisBtn,
+      .back {
+        margin: 0 20px 0 20px;
+        padding: 10px 20px;
+        color: #03430c;
+        background-color: #ffffff;
+        border: solid 1px #03430c;
+        text-align: center;
+      }
+
+      #registerBox .regisBtn:hover,
+      .back:hover {
+        text-shadow: 0 0 0 #ffffff;
+        background-color: #03430c;
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mainBox">
+      <a href="/" class="main_title">Re:Spring 피트니스 🌷</a>
+      <p class="sub_title">회원 센터 출입</p>
+    </div>
+
+    <div id="video_container">
+      <video
+        id="webcam"
+        class="re_v"
+        width="640"
+        height="480"
+        autoplay
+        muted="muted"
+      ></video
+      ><br />
+    </div>
+
+    <div id="inputBox">
+      <input
+        type="text"
+        class="inName"
+        id="userName"
+        placeholder="예시 홍길동1234"
+      />
+      <label for="userName">'회원명+전화번호 뒷자리'를 입력해 주세요.</label
+      ><br />
+    </div>
+    <div id="registerBox">
+      <button class="regisBtn" id="registerButton">얼굴 등록</button>
+      <a class="back" href="/">돌아가기</a>
+    </div>
+    <p id="resultMessage"></p>
+
+    <script>
+      // let registeredFace;
+      const videoElement = document.getElementById("webcam");
+      const registerButton = document.getElementById("registerButton");
+      // const recognizeButton = document.getElementById('recognizeButton');
+      const resultMessage = document.getElementById("resultMessage");
+      // let isProcessingFrame = false;
+      // const startRecognitionButton = document.getElementById('startRecognitionButton');
+
+      // 웹 카메라 스트리밍
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          videoElement.srcObject = stream;
+          videoElement.play();
+          // startFaceRecognition();
+        })
+        .catch((error) => {
+          console.error("Error accessing webcam:", error);
+          alert(
+            "웹캠에 접근할 수 없습니다. 웹캠 권한과 브라우저 호환성을 확인해주세요."
+          );
+        });
+
+      // 등록된 얼굴 등록 버튼 클릭 이벤트
+      registerButton.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = videoElement.width;
+        canvas.height = videoElement.height;
+        const context = canvas.getContext("2d");
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        const imageDataURL = canvas.toDataURL("image/jpeg");
+        const userName = document.getElementById("userName").value;
+
+        // 캔버스에서 이미지 데이터를 바이너리로 변환
+        canvas.toBlob((blob) => {
+          const formData = new FormData();
+          formData.append("image", blob, "image.jpg");
+          formData.append("user_name", userName);
+
+          // 바이너리 데이터를 서버로 전송
+          fetch("/register_face", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.text())
+            .then((data) => {
+              // 서버에서 반환한 메시지를 alert 창으로 띄우기
+              alert(data);
+            })
+            .catch((error) => console.error("Error registering face:", error));
+        }, "image/jpeg");
+      });
+    </script>
+  </body>
+</html>

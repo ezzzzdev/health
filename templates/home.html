@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re:Sprng 피트니스 출입 프로그램</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/common.css">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script> -->
+    <style>
+        #buttons{
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #buttons .regisBtn, .attendBtn{
+            margin: 0 20px 0 20px;
+            padding: 10px 20px;
+            color : #03430c;
+            background-color : #ffffff;
+            border : solid 1px #03430c;
+            text-align: center;
+        }
+
+        #buttons .regisBtn:hover, .attendBtn:hover{
+            text-shadow: 0 0 0 #ffffff;
+            background-color : #03430c;
+            color : #ffffff;
+        }
+
+        .image_container {
+            display: flex;
+            justify-content: center;
+            margin-top: 100px;
+        }
+
+    
+    </style>
+</head>
+<body>
+    <div id="mainBox">
+        <a href="/" class="main_title">Re:Spring 피트니스 🌷</a>
+        <p class="sub_title">당신의 건강과 웰빙을 위해</p>
+    </div>
+
+    <div class="image_container">
+        <img src="/static/images/health.jpg" width="700" height="350" class="img">
+    </div>
+
+    <div id="buttons">
+        <a class="regisBtn" href="/regist">회원 얼굴 등록</a>
+        <a class="attendBtn" href="/enterexit">회원 센터 출입</a>
+    </div>
+    <p id="resultMessage"></p>
+</body>
